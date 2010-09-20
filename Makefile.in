@@ -15,6 +15,8 @@ wrapperfs: wrapperfs.o
 clean:
 	$(RM) *.o
 
-distclean: clean)
+distclean: clean
 	$(RM) -r $(TARGETS) Makefile autom4te.cache config.h config.h.in \
-		config.log config.status configure
+		config.log config.status configure configure.scan aclocal.m4 autoconf.log
+
+.PHONY: all clean distclean
