@@ -1,0 +1,20 @@
+#
+# Makefile for fuseutils
+#
+
+
+CFLAGS += @CFLAGS@ @fuse_CFLAGS@ -DFUSE_USE_VERSION=27
+LDFLAGS += @LDFLAGS@ @fuse_LIBS@
+TARGETS = wrapperfs
+
+all: $(TARGETS)
+
+wrapperfs: wrapperfs.o
+	$(CC) $(LDFLAGS) -o $@ $^
+
+clean:
+	$(RM) *.o
+
+distclean: clean)
+	$(RM) -r $(TARGETS) Makefile autom4te.cache config.h config.h.in \
+		config.log config.status configure
