@@ -365,17 +365,20 @@ int main(int argc, char *argv[]) {
 	memset(&options, 0, sizeof(struct options));
 
 	if (fuse_opt_parse(&args, &options, wrapperfs_opts, wrapperfs_opt_proc) == -1) {
-		return -1;
+		ret = -1;
+		goto exit_handler;
 	}
 
 	if (options.basedir == NULL) {
 		wrapperfs_debug(LOG_ERROR, "You have to point out targeted directory");
-		exit(1);
+		ret = 1;
+		goto exit_handler;
 	} 
 
 	if (access(options.basedir, F_OK) == -1) {
 		perror("Targeted directory");
-		exit(1);
+		ret = 1;
+		goto exit_handler;
 	}
 
 	wrapperfs_debug(LOG_INFO, "Mount %s to %s", args.argv[0], options.basedir);
@@ -384,6 +387,7 @@ int main(int argc, char *argv[]) {
 	if (ret) 
 		printf("\n");
 
+exit_handler:
 	fuse_opt_free_args(&args);
 
 	return ret;
