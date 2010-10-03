@@ -30,6 +30,8 @@
 
 #define BUFSIZE 1024
 
+#define CALL_RETURN(x) return (x) == -1 ? -errno : 0;
+
 /** command line options */
 struct options {
 	char *basedir;
@@ -45,7 +47,7 @@ enum {
 };
 
 
-static void wrapperfs_debug(int log_level, char *format, ...) 
+static void wrapperfs_debug(int log_level, const char *format, ...) 
 {
 	static const char * LOG_TAGS[] = { "INFO", "ERROR", "WARNING", "DEBUG" };
 	assert (log_level < LOG_UNKNOWN);
@@ -73,7 +75,7 @@ static int wrapperfs_getattr(const char *path, struct stat *stbuf)
 	char abspath[BUFSIZE];
 	wrapperfs_abspath(path, abspath, BUFSIZE);
 	memset(stbuf, 0, sizeof(struct stat));
-	return stat(abspath, stbuf) == -1 ? -errno: 0;
+	CALL_RETURN( stat(abspath, stbuf) );
 }
 
 
@@ -131,7 +133,7 @@ static int wrapperfs_create(const char *path, mode_t mode, struct fuse_file_info
 
 static int wrapperfs_release(const char *path , struct fuse_file_info *fi) {
 	(void) path;
-	return close(fi->fh) == -1 ? -errno : 0;
+	CALL_RETURN( close(fi->fh) );
 }
 
 
@@ -154,14 +156,14 @@ static int wrapperfs_write(const char *path, const char *buf, size_t size,
 static int wrapperfs_access(const char *path, int flag) {
 	char abspath[BUFSIZE];
 	wrapperfs_abspath(path, abspath, BUFSIZE);
-	return access(abspath, flag) == -1 ? -errno : 0;
+	CALL_RETURN( access(abspath, flag) );
 }
 
 
 static int wrapperfs_chmod(const char *path, mode_t mode) {
 	char abspath[BUFSIZE];
 	wrapperfs_abspath(path, abspath, BUFSIZE);
-	return chmod(abspath, mode) == -1 ? -errno : 0;
+	CALL_RETURN( chmod(abspath, mode) );
 }
 
 
@@ -169,7 +171,7 @@ static int wrapperfs_chown(const char *path, uid_t owner, gid_t group)
 {
 	char abspath[BUFSIZE];
 	wrapperfs_abspath(path, abspath, BUFSIZE);
-	return chown(abspath, owner, group) == -1 ? -errno : 0;
+	CALL_RETURN( chown(abspath, owner, group) );
 }
 
 
@@ -184,7 +186,7 @@ static int wrapperfs_utimens(const char *path, const struct timespec tv[2])
 
 	wrapperfs_abspath(path, abspath, BUFSIZE);
 
-	return utimes(abspath, times) == -1 ? -errno : 0;
+	CALL_RETURN( utimes(abspath, times) );
 }
 
 
@@ -192,7 +194,7 @@ static int wrapperfs_unlink(const char *path)
 {
 	char abspath[BUFSIZE];
 	wrapperfs_abspath(path, abspath, BUFSIZE);
-	return unlink(abspath) == -1 ? -errno : 0;
+	CALL_RETURN( unlink(abspath) );
 }
 
 
@@ -201,7 +203,7 @@ static int wrapperfs_rename(const char *oldpath, const char *newpath) {
 	char abs_newpath[BUFSIZE];
 	wrapperfs_abspath(oldpath, abs_oldpath, BUFSIZE);
 	wrapperfs_abspath(newpath, abs_newpath, BUFSIZE);
-	return rename(abs_oldpath, abs_newpath) == -1 ? -errno : 0;
+	CALL_RETURN( rename(abs_oldpath, abs_newpath) );
 }
 
 
@@ -210,7 +212,7 @@ static int wrapperfs_link(const char *path1, const char *path2) {
 	char abs_path2[BUFSIZE];
 	wrapperfs_abspath(path1, abs_path1, BUFSIZE);
 	wrapperfs_abspath(path2, abs_path2, BUFSIZE);
-	return link(abs_path1, abs_path2) == -1 ? -errno : 0;
+	CALL_RETURN( link(abs_path1, abs_path2) );
 }
 
 
@@ -219,7 +221,7 @@ static int wrapperfs_symlink(const char *path1, const char *path2) {
 	char abs_path2[BUFSIZE];
 	wrapperfs_abspath(path1, abs_path1, BUFSIZE);
 	wrapperfs_abspath(path2, abs_path2, BUFSIZE);
-	return symlink(abs_path1, abs_path2) == -1 ? -errno : 0;
+	CALL_RETURN( symlink(abs_path1, abs_path2) ); 
 }
 
 
@@ -227,7 +229,7 @@ static int wrapperfs_truncate(const char *path, off_t length)
 {
 	char abspath[BUFSIZE];
 	wrapperfs_abspath(path, abspath, BUFSIZE);
-	return truncate(abspath, length) == -1 ? -errno : 0;
+	CALL_RETURN( truncate(abspath, length) );
 }
 
 
@@ -235,14 +237,14 @@ static int wrapperfs_mkdir(const char *path, mode_t mode)
 {
 	char abspath[BUFSIZE];
 	wrapperfs_abspath(path, abspath, BUFSIZE);
-	return mkdir(abspath, mode) == -1 ? -errno : 0;
+	CALL_RETURN( mkdir(abspath, mode) );
 }
 
 
 static int wrapperfs_rmdir(const char *path) {
 	char abspath[BUFSIZE];
 	wrapperfs_abspath(path, abspath, BUFSIZE);
-	return rmdir(abspath) == -1 ? -errno : 0;
+	CALL_RETURN( rmdir(abspath) );
 }
 
 
