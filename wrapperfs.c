@@ -59,31 +59,21 @@ static void wrapperfs_debug(int log_level, char *format, ...)
 }
 
 
-static char * wrapperfs_abspath(const char * path) 
+static void wrapperfs_abspath(const char *path, char *buffer, size_t bufsize) 
 {
-	char *ret = malloc(BUFSIZE);
-	if (ret == NULL) {
-		perror("wrapperfs_abspath: failed to allocate memory");
-		return ret;
-	}
-	memset(ret, 0, BUFSIZE);
-	snprintf(ret, BUFSIZE, "%s%s", options.basedir, path);
-	ret[BUFSIZE-1] = '\0';
-	return ret;
+	assert(buffer);
+	memset(buffer, 0, bufsize);
+	snprintf(buffer, bufsize, "%s%s", options.basedir, path);
+	buffer[BUFSIZE-1] = '\0';
 }
 
 
 static int wrapperfs_getattr(const char *path, struct stat *stbuf) 
 {
-    int res = 0;
+	char abspath[BUFSIZE];
+	wrapperfs_abspath(path, abspath, BUFSIZE);
 	memset(stbuf, 0, sizeof(struct stat));
-	char * abspath = wrapperfs_abspath(path);
-	res = stat(abspath, stbuf);
-	if (res == -1) {
-		res = -errno;
-	}
-	free(abspath);
-    return res;
+	return stat(abspath, stbuf) == -1 ? -errno: 0;
 }
 
 
@@ -94,11 +84,11 @@ static int wrapperfs_readdir(const char *path, void *buf, fuse_fill_dir_t filler
 	(void) fi;
 
 	int res = 0;
-	char *abspath = wrapperfs_abspath(path);
+	char abspath[BUFSIZE];
+	wrapperfs_abspath(path, abspath, BUFSIZE);
 
 	DIR *dirp = opendir(abspath);
 	if (dirp == NULL) {
-		free(abspath);
 		return -errno;
 	}
 
@@ -110,48 +100,38 @@ static int wrapperfs_readdir(const char *path, void *buf, fuse_fill_dir_t filler
 		filler(buf, dp->d_name, NULL, 0);
 	}
 	closedir(dirp);
-	free(abspath);
 	return res;
 }
 
 
 static int wrapperfs_open(const char *path, struct fuse_file_info *fi) 
 {
-	char *abspath = wrapperfs_abspath(path);
-	int res = 0;
+	char abspath[BUFSIZE];
+	wrapperfs_abspath(path, abspath, BUFSIZE);
 	int fd = open(abspath, fi->flags);
 	if (fd == -1) {
-		res = -errno;
-	} else {
-		fi->fh = fd;
-	}
-
-	free(abspath);
+		return -errno;
+	};
+	fi->fh = fd;
 	return 0;
 }
 
 
 static int wrapperfs_create(const char *path, mode_t mode, struct fuse_file_info *fi) {
-	char *abspath = wrapperfs_abspath(path);
+	char abspath[BUFSIZE];
+	wrapperfs_abspath(path, abspath, BUFSIZE);
 	int fd = creat(abspath, mode);
-	int res = 0;
 	if (fd == -1) {
-		res = -errno;
-	} else {
-		fi->fh = fd;
-	}
-	free(abspath);
-	return res;
+		return -errno;
+	};
+	fi->fh = fd;
+	return 0;
 }
 
 
 static int wrapperfs_release(const char *path , struct fuse_file_info *fi) {
 	(void) path;
-	int res = close(fi->fh);
-	if (res == -1) {
-		res = -errno;
-	} 
-	return res;
+	return close(fi->fh) == -1 ? -errno : 0;
 }
 
 
@@ -172,114 +152,97 @@ static int wrapperfs_write(const char *path, const char *buf, size_t size,
 
 
 static int wrapperfs_access(const char *path, int flag) {
-	char *abspath = wrapperfs_abspath(path);
-	int res = access(abspath, flag);
-	if (res == -1) {
-		res = -errno;
-	}
-	free(abspath);
-	return res;
+	char abspath[BUFSIZE];
+	wrapperfs_abspath(path, abspath, BUFSIZE);
+	return access(abspath, flag) == -1 ? -errno : 0;
 }
 
 
 static int wrapperfs_chmod(const char *path, mode_t mode) {
-	char * abspath = wrapperfs_abspath(path);
-	int res = chmod(abspath, mode);
-	if (res == -1) {
-		res = -errno;
-	} 
-	free(abspath);
-	return res;
+	char abspath[BUFSIZE];
+	wrapperfs_abspath(path, abspath, BUFSIZE);
+	return chmod(abspath, mode) == -1 ? -errno : 0;
 }
 
 
 static int wrapperfs_chown(const char *path, uid_t owner, gid_t group) 
 {
-	char * abspath = wrapperfs_abspath(path);
-	int res = chown(abspath, owner, group);
-	if (res == -1) {
-		res = -errno;
-	}
-	free(abspath);
-	return res;
+	char abspath[BUFSIZE];
+	wrapperfs_abspath(path, abspath, BUFSIZE);
+	return chown(abspath, owner, group) == -1 ? -errno : 0;
 }
 
 
 static int wrapperfs_utimens(const char *path, const struct timespec tv[2]) 
 {
-	char *abspath = wrapperfs_abspath(path);
-	int res = 0;
+	char abspath[BUFSIZE];
 	struct timeval times[2];
 	times[0].tv_sec = tv[0].tv_sec;
 	times[0].tv_usec = tv[0].tv_nsec / 1000;
 	times[1].tv_sec = tv[1].tv_sec;
 	times[1].tv_usec = tv[1].tv_nsec / 1000;
 
-	res = utimes(abspath, times);
-	if (res == -1) {
-		res = -errno;
-	}
-	free(abspath);
-	return res;
+	wrapperfs_abspath(path, abspath, BUFSIZE);
+
+	return utimes(abspath, times) == -1 ? -errno : 0;
 }
 
 
 static int wrapperfs_unlink(const char *path) 
 {
-	char *abspath = wrapperfs_abspath(path);
-	int res = unlink(abspath);
-	if (res == -1) {
-		res = -errno;
-	}
-	free(abspath);
-	return res;
+	char abspath[BUFSIZE];
+	wrapperfs_abspath(path, abspath, BUFSIZE);
+	return unlink(abspath) == -1 ? -errno : 0;
 }
 
 
 static int wrapperfs_rename(const char *oldpath, const char *newpath) {
-	char *abs_oldpath = wrapperfs_abspath(oldpath);
-	char *abs_newpath = wrapperfs_abspath(newpath);
-	int res = rename(abs_oldpath, abs_newpath);
-	if (res == -1) {
-		res = -errno;
-	}
-	free(abs_oldpath);
-	free(abs_newpath);
-	return res;
+	char abs_oldpath[BUFSIZE];
+	char abs_newpath[BUFSIZE];
+	wrapperfs_abspath(oldpath, abs_oldpath, BUFSIZE);
+	wrapperfs_abspath(newpath, abs_newpath, BUFSIZE);
+	return rename(abs_oldpath, abs_newpath) == -1 ? -errno : 0;
 }
+
+
+static int wrapperfs_link(const char *path1, const char *path2) {
+	char abs_path1[BUFSIZE];
+	char abs_path2[BUFSIZE];
+	wrapperfs_abspath(path1, abs_path1, BUFSIZE);
+	wrapperfs_abspath(path2, abs_path2, BUFSIZE);
+	return link(abs_path1, abs_path2) == -1 ? -errno : 0;
+}
+
+
+static int wrapperfs_symlink(const char *path1, const char *path2) {
+	char abs_path1[BUFSIZE];
+	char abs_path2[BUFSIZE];
+	wrapperfs_abspath(path1, abs_path1, BUFSIZE);
+	wrapperfs_abspath(path2, abs_path2, BUFSIZE);
+	return symlink(abs_path1, abs_path2) == -1 ? -errno : 0;
+}
+
 
 static int wrapperfs_truncate(const char *path, off_t length) 
 {
-	char *abspath = wrapperfs_abspath(path);
-	int res = truncate(abspath, length);
-	if (res == -1) {
-		res = -errno;
-	}
-	free(abspath);
-	return res;
+	char abspath[BUFSIZE];
+	wrapperfs_abspath(path, abspath, BUFSIZE);
+	return truncate(abspath, length) == -1 ? -errno : 0;
 }
 
 
 static int wrapperfs_mkdir(const char *path, mode_t mode) 
 {
-	char *abspath = wrapperfs_abspath(path);
-	int res = mkdir(abspath, mode);
-	if (res == -1) {
-		res = -errno;
-	}
-	free(abspath);
-	return res;
+	char abspath[BUFSIZE];
+	wrapperfs_abspath(path, abspath, BUFSIZE);
+	return mkdir(abspath, mode) == -1 ? -errno : 0;
 }
 
 
 static int wrapperfs_rmdir(const char *path) {
-	char *abspath = wrapperfs_abspath(path);
-	int res = rmdir(abspath);
-	if (res == -1) {
-		res = -errno;
-	}
-	free(abspath);
-	return res;
+	char abspath[BUFSIZE];
+	wrapperfs_abspath(path, abspath, BUFSIZE);
+	return rmdir(abspath) == -1 ? -errno : 0;
 }
 
 
@@ -289,6 +252,7 @@ static struct fuse_operations wrapperfs_operations = {
 	.chown = wrapperfs_chown,
 	.create = wrapperfs_create,
 	.getattr = wrapperfs_getattr,
+	.link = wrapperfs_link,
 	.mkdir = wrapperfs_mkdir,
 	.open = wrapperfs_open,
 	.read = wrapperfs_read,
@@ -296,6 +260,7 @@ static struct fuse_operations wrapperfs_operations = {
 	.release = wrapperfs_release,
 	.rename = wrapperfs_rename,
 	.rmdir = wrapperfs_rmdir,
+	.symlink = wrapperfs_symlink,
 	.truncate = wrapperfs_truncate,
 	.unlink = wrapperfs_unlink,
 	.utimens = wrapperfs_utimens,
