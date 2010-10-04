@@ -3,10 +3,10 @@
 
 AC_PREREQ(2.61)
 AC_INIT(fuseutils, 0.1, [eddyxu@gmail.com])
+AM_INIT_AUTOMAKE
 AC_CONFIG_SRCDIR([wrapperfs.c])
 AC_CONFIG_HEADER([config.h])
 
-CFLAGS="-Wall -pedantic -Wparentheses -std=c99"
 # Checks for programs.
 AC_PROG_CC
 
@@ -35,6 +35,5 @@ AC_FUNC_STAT
 AC_FUNC_VPRINTF
 AC_CHECK_FUNCS([memset mkdir rmdir])
 
-AC_SUBST(CFLAGS)
 AC_CONFIG_FILES([Makefile])
 AC_OUTPUT
