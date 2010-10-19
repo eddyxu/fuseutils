@@ -219,6 +219,17 @@ static int wrapperfs_link(const char *path1, const char *path2) {
 static int wrapperfs_symlink(const char *path1, const char *path2) {
 	char abs_path1[BUFSIZE];
 	char abs_path2[BUFSIZE];
+	/*
+	 * FUSE pass out-of-partition source directory path as absolute path,
+	 * and pass in-partition source directory as related path
+	 */
+	if (path1[0] == '/') { 
+		strncpy(abs_path1, path1, BUFSIZE);
+	} else {
+		memset(abs_path1, 0, BUFSIZE);
+		snprintf(abs_path1, BUFSIZE, "%s/%s", options.basedir, path1);
+		abs_path1[BUFSIZE-1] = '\0';
+	}
 	wrapperfs_abspath(path1, abs_path1, BUFSIZE);
 	wrapperfs_abspath(path2, abs_path2, BUFSIZE);
 	CALL_RETURN( symlink(abs_path1, abs_path2) ); 
