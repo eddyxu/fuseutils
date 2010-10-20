@@ -230,7 +230,6 @@ static int wrapperfs_symlink(const char *path1, const char *path2) {
 		snprintf(abs_path1, BUFSIZE, "%s/%s", options.basedir, path1);
 		abs_path1[BUFSIZE-1] = '\0';
 	}
-	wrapperfs_abspath(path1, abs_path1, BUFSIZE);
 	wrapperfs_abspath(path2, abs_path2, BUFSIZE);
 	CALL_RETURN( symlink(abs_path1, abs_path2) ); 
 }
