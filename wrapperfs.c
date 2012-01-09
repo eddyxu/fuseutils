@@ -9,22 +9,22 @@
  */
 
 #define _XOPEN_SOURCE 500
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <string.h>
-#include <errno.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <sys/time.h>
-#include <dirent.h>
-#include <stddef.h>
-#include <stdarg.h>
-#include <utime.h>
-#include <fcntl.h>
 #include <assert.h>
+#include <dirent.h>
+#include <errno.h>
+#include <fcntl.h>
 #include <fuse.h>
 #include <fuse_opt.h>
+#include <stdarg.h>
+#include <stddef.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/stat.h>
+#include <sys/time.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <utime.h>
 
 #include "config.h"
 
@@ -47,7 +47,7 @@ enum {
 };
 
 
-static void wrapperfs_debug(int log_level, const char *format, ...) 
+static void wrapperfs_debug(int log_level, const char *format, ...)
 {
 	static const char * LOG_TAGS[] = { "INFO", "ERROR", "WARNING", "DEBUG" };
 	assert (log_level < LOG_UNKNOWN);
@@ -61,7 +61,7 @@ static void wrapperfs_debug(int log_level, const char *format, ...)
 }
 
 
-static void wrapperfs_abspath(const char *path, char *buffer, size_t bufsize) 
+static void wrapperfs_abspath(const char *path, char *buffer, size_t bufsize)
 {
 	assert(buffer);
 	memset(buffer, 0, bufsize);
@@ -70,7 +70,7 @@ static void wrapperfs_abspath(const char *path, char *buffer, size_t bufsize)
 }
 
 
-static int wrapperfs_getattr(const char *path, struct stat *stbuf) 
+static int wrapperfs_getattr(const char *path, struct stat *stbuf)
 {
 	char abspath[BUFSIZE];
 	wrapperfs_abspath(path, abspath, BUFSIZE);
@@ -80,7 +80,7 @@ static int wrapperfs_getattr(const char *path, struct stat *stbuf)
 
 
 static int wrapperfs_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
-                         off_t offset, struct fuse_file_info *fi) 
+                         off_t offset, struct fuse_file_info *fi)
 {
 	(void) offset;
 	(void) fi;
@@ -106,7 +106,7 @@ static int wrapperfs_readdir(const char *path, void *buf, fuse_fill_dir_t filler
 }
 
 
-static int wrapperfs_open(const char *path, struct fuse_file_info *fi) 
+static int wrapperfs_open(const char *path, struct fuse_file_info *fi)
 {
 	char abspath[BUFSIZE];
 	wrapperfs_abspath(path, abspath, BUFSIZE);
@@ -145,8 +145,8 @@ static int wrapperfs_read(const char *path, char *buf, size_t size, off_t offset
 }
 
 
-static int wrapperfs_write(const char *path, const char *buf, size_t size, 
-						off_t offset, struct fuse_file_info *fi) 
+static int wrapperfs_write(const char *path, const char *buf, size_t size,
+						off_t offset, struct fuse_file_info *fi)
 {
 	(void) path;
 	return pwrite(fi->fh, buf, size, offset);
@@ -167,7 +167,7 @@ static int wrapperfs_chmod(const char *path, mode_t mode) {
 }
 
 
-static int wrapperfs_chown(const char *path, uid_t owner, gid_t group) 
+static int wrapperfs_chown(const char *path, uid_t owner, gid_t group)
 {
 	char abspath[BUFSIZE];
 	wrapperfs_abspath(path, abspath, BUFSIZE);
@@ -175,7 +175,7 @@ static int wrapperfs_chown(const char *path, uid_t owner, gid_t group)
 }
 
 
-static int wrapperfs_utimens(const char *path, const struct timespec tv[2]) 
+static int wrapperfs_utimens(const char *path, const struct timespec tv[2])
 {
 	char abspath[BUFSIZE];
 	struct timeval times[2];
@@ -190,7 +190,7 @@ static int wrapperfs_utimens(const char *path, const struct timespec tv[2])
 }
 
 
-static int wrapperfs_unlink(const char *path) 
+static int wrapperfs_unlink(const char *path)
 {
 	char abspath[BUFSIZE];
 	wrapperfs_abspath(path, abspath, BUFSIZE);
@@ -223,7 +223,7 @@ static int wrapperfs_symlink(const char *path1, const char *path2) {
 	 * FUSE pass out-of-partition source directory path as absolute path,
 	 * and pass in-partition source directory as related path
 	 */
-	if (path1[0] == '/') { 
+	if (path1[0] == '/') {
 		strncpy(abs_path1, path1, BUFSIZE);
 	} else {
 		memset(abs_path1, 0, BUFSIZE);
@@ -231,11 +231,11 @@ static int wrapperfs_symlink(const char *path1, const char *path2) {
 		abs_path1[BUFSIZE-1] = '\0';
 	}
 	wrapperfs_abspath(path2, abs_path2, BUFSIZE);
-	CALL_RETURN( symlink(abs_path1, abs_path2) ); 
+	CALL_RETURN( symlink(abs_path1, abs_path2) );
 }
 
 
-static int wrapperfs_truncate(const char *path, off_t length) 
+static int wrapperfs_truncate(const char *path, off_t length)
 {
 	char abspath[BUFSIZE];
 	wrapperfs_abspath(path, abspath, BUFSIZE);
@@ -243,7 +243,7 @@ static int wrapperfs_truncate(const char *path, off_t length)
 }
 
 
-static int wrapperfs_mkdir(const char *path, mode_t mode) 
+static int wrapperfs_mkdir(const char *path, mode_t mode)
 {
 	char abspath[BUFSIZE];
 	wrapperfs_abspath(path, abspath, BUFSIZE);
@@ -300,7 +300,7 @@ static struct fuse_opt wrapperfs_opts[] = {
 };
 
 
-static int wrapperfs_opt_proc(void *data, const char *arg, int key, struct fuse_args *outargs) 
+static int wrapperfs_opt_proc(void *data, const char *arg, int key, struct fuse_args *outargs)
 {
 	int res = 1;
 	switch (key) {
@@ -331,7 +331,7 @@ static int wrapperfs_opt_proc(void *data, const char *arg, int key, struct fuse_
 		res = 0;  // this arg is to be discarded
 		break;
 	}
-	return 1;
+	return res;
 }
 
 
@@ -350,7 +350,7 @@ int main(int argc, char *argv[]) {
 		wrapperfs_debug(LOG_ERROR, "You have to point out targeted directory");
 		ret = 1;
 		goto exit_handler;
-	} 
+	}
 
 	if (access(options.basedir, F_OK) == -1) {
 		perror("Targeted directory");
@@ -361,7 +361,7 @@ int main(int argc, char *argv[]) {
 	wrapperfs_debug(LOG_INFO, "Mount %s to %s", args.argv[0], options.basedir);
 	ret = fuse_main(args.argc, args.argv, &wrapperfs_operations, NULL);
 
-	if (ret) 
+	if (ret)
 		printf("\n");
 
 exit_handler:
