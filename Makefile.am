@@ -1,6 +1,6 @@
 AUTOMAKE_OPTIONS = foreign
-AM_CFLAGS = $(fuse_CFLAGS) -DFUSE_USE_VERSION=26 -Wall -pedantic -Wparentheses -std=c99
+AM_CXXFLAGS = $(fuse_CFLAGS) -DFUSE_USE_VERSION=29 -Wall -DFILE_OFFSET_BITS=64 -pedantic -Wparentheses
 LDADD = $(fuse_LIBS)
 
 bin_PROGRAMS = wrapperfs
-wrapperfs_SOURCE = wrapperfs.c
+wrapperfs_SOURCES = wrapperfs.cpp

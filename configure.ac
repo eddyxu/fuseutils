@@ -4,14 +4,16 @@
 AC_PREREQ(2.61)
 AC_INIT(fuseutils, 0.1, [eddyxu@gmail.com])
 AM_INIT_AUTOMAKE
-AC_CONFIG_SRCDIR([wrapperfs.c])
+AC_CONFIG_SRCDIR([wrapperfs.cpp])
 AC_CONFIG_HEADER([config.h])
+AC_CONFIG_MACRO_DIR([m4])
 
 # Checks for programs.
-AC_PROG_CC
+AC_PROG_CXX
+AC_LANG([C++])
 
 # Checks for libraries.
-PKG_CHECK_MODULES([fuse], [fuse >= 2.7.0], [], [AC_MSG_ERROR(fuse was not found)])
+PKG_CHECK_MODULES([fuse], [fuse >= 2.8.0], [], [AC_MSG_ERROR(fuse was not found)])
 
 # Checks for header files.
 AC_HEADER_DIRENT
@@ -26,6 +28,10 @@ AC_TYPE_MODE_T
 AC_TYPE_OFF_T
 AC_TYPE_SIZE_T
 AC_HEADER_TIME
+AX_CXX_COMPILE_STDCXX_11(noext)
+if test "$ac_cv_cxx_compile_cxx11" = no ; then
+	AC_MSG_ERROR("It requires C++ 11 to build.!")
+fi
 
 # Checks for library functions.
 AC_FUNC_CHOWN
