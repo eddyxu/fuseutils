@@ -1,0 +1,15 @@
+language: cpp
+compiler:
+  - gcc
+before_install:
+  - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+  - sudo apt-get update
+  - sudo apt-get install -y g++-4.7 libfuse-dev
+before_script:
+  - ./bootstrap
+script:
+  - export LD_LIBRARY_PATH=/usr/local/lib
+  - CXX=g++-4.7 ./configure && make && make check
+notifications:
+  email:
+    - xulei82@gmail.com
