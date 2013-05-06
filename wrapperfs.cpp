@@ -39,8 +39,6 @@
 
 using std::string;
 
-#define BUFSIZE 1024
-
 #define CALL_RETURN(x) return (x) == -1 ? -errno : 0;
 
 /** command line options */
