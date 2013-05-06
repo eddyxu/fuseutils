@@ -1,11 +1,24 @@
+/*
+ * Copyright 2010-2013 (c) Lei Xu <eddyxu@gmail.com>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 /**
- * \brief Wrapper File System
+ * \brief Wrapper File System.
  *
- * It works as a pesudo-file-system on top of existing file system (Ext3/4,
- * Btrfs, HFS+ and etc).
- *
- * \author Lei Xu <lxu@cse.unl.edu>
- * Copyright 2010 (c) University of Nebraska-Lincoln
+ * It works as a pesudo-file-system running on top of existing file system
+ * (Ext3/4, Btrfs, HFS+ and etc).
  */
 
 #include <dirent.h>
@@ -13,10 +26,8 @@
 #include <fcntl.h>
 #include <fuse.h>
 #include <fuse_opt.h>
-#include <stdarg.h>
 #include <stddef.h>
 #include <stdlib.h>
-#include <string.h>
 #include <sys/stat.h>
 #include <sys/time.h>
 #include <sys/types.h>
@@ -266,9 +277,6 @@ int main(int argc, char *argv[]) {
   opers.write = wrapperfs_write;
 
   struct fuse_args args = FUSE_ARGS_INIT(argc, argv);
-
-  memset(&options, 0, sizeof(struct options));
-
   if (fuse_opt_parse(&args, &options, wrapperfs_opts,
                      wrapperfs_opt_proc) == -1) {
     ret = -1;

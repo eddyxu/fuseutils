@@ -18,9 +18,11 @@ Dependencies:
 
  * FUSE >= 2.8
  * g++ >= 4.7.2
- 
-Install dependencies on Ubuntu
 
+It should work on all FUSE-supported platforms (e.g., Linux, MacOSX and
+FreeBSD), but it has only been tested on Ubuntu 13.04 and OSX (10.8).
+
+Install dependencies on Ubuntu
 ```sh
 $ sudo apt-get install libfuse-dev g++
 ```
